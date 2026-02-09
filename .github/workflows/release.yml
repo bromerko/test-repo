@@ -1,0 +1,42 @@
+name: Release
+run-name: Release - ${{ github.ref_name }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: "Semantic Release"
+    runs-on: ubuntu-latest
+    outputs:
+        new-release-published: ${{ steps.semantic.outputs.new-release-published }}
+        release-version: ${{ steps.semantic.outputs.release-version }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - uses: codfish/semantic-release-action@v3
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Echo the release version
+        run: echo "The release version is ${{ steps.semantic.outputs.release-version }}"
+
+  workflow-status:
+    if: always()
+    name: Slack Workflow Status
+    needs:
+      - release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: vena-security/gh-actions/actions/slack-workflow-status@main
+        id: slack
+        with:
+          slack_webhook_on_success: ${{ secrets.SLACK_RELEASES_WEBHOOK_URL }}
+          slack_webhook_on_failure: ${{ secrets.SLACK_DEPLOYMENT_ALERTS_WEBHOOK_URL }}
+          slack_tags_on_failure: "@engine-eng"
