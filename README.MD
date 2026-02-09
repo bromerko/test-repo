@@ -16,3 +16,5 @@ The following GitHub Actions will be included in the cloned repository:
 Please customize the `.pre-commit-config.yaml` file according to the programming language used in your project.
 
 For more details, refer to the [Notion Page](https://www.notion.so/nagomi-security/How-To-Create-a-new-GitHub-Repository-12bd8d0a77574743b357bf71d31ab8f3).
+
+Test
